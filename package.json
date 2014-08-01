@@ -1,0 +1,16 @@
+{
+  "name": "bootnetworkdetector",
+  "version": "0.0.0",
+  "description": "Boot Network Detector for Rasberry Pi to publish aquired IP address",
+  "main": "app",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mikkel Flindt Heisterberg",
+  "license": "ISC",
+  "dependencies": {
+    "fibers": "^1.0.1",
+    "pushover-notifications": "^0.2.0",
+    "underscore": "^1.6.0"
+  }
+}
