@@ -17,7 +17,22 @@ var sleep = function(ms) {
 };
 
 var addressesAquired = function(addresses) {
-	console.log(addresses);
+	var p = new push( {
+	    user: process.env['PUSHOVER_USER'],
+	    token: process.env['PUSHOVER_TOKEN'],
+	});
+	var msg = {
+	    message: os.hostname() + " aquired an IP address of " + addresses.en0.address, 
+	    title: "Aquired IP address",
+	    device: 'lekkim_iphone',
+	    priority: 1
+	};
+	p.send(msg, function(err, result) {
+	    if (err) {
+	        throw err;
+	    }
+	    console.log(result);
+	});
 }
 
 // wait for addresses
