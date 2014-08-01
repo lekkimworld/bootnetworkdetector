@@ -6,7 +6,9 @@ var _ = require("underscore");
 var Fiber = require('fibers');
 
 // max wait (seconds)
-var max_wait = 30;
+var DO_NOTIFICATION = false;
+var INITIAL_SLEEP = 0;
+var MAX_WAIT = 30;
 
 var sleep = function(ms) {
     var fiber = Fiber.current;
@@ -17,12 +19,29 @@ var sleep = function(ms) {
 };
 
 var addressesAquired = function(addresses) {
+	// compose message
+	var message = os.hostname() + " aquired IP address(es): ";
+	var idx=0;
+	_.each(addresses, function(address, key) {
+		if (idx > 0) message += ", ";
+		message += key;
+		message += "=";
+		message += address.address;
+		idx++;
+	});
+
+	// send
+	if (!DO_NOTIFICATION) {
+		console.log(message);
+		return;
+	}
+
 	var p = new push( {
 	    user: process.env['PUSHOVER_USER'],
 	    token: process.env['PUSHOVER_TOKEN'],
 	});
 	var msg = {
-	    message: os.hostname() + " aquired an IP address of " + addresses.en0.address, 
+	    message: message, 
 	    title: "Aquired IP address",
 	    device: 'lekkim_iphone',
 	    priority: 1
@@ -39,8 +58,9 @@ var addressesAquired = function(addresses) {
 Fiber(function() {
 	// aquire addresses
 	var addresses = {};
-	while (_.isEmpty(addresses) && process.uptime() < max_wait) {
-		_.forEach(Object.keys(os.networkInterfaces()), function(key) {
+	sleep(INITIAL_SLEEP * 1000);
+	while (_.isEmpty(addresses) && process.uptime() < MAX_WAIT) {
+		_.each(Object.keys(os.networkInterfaces()), function(key) {
 			var ipv4 = _.find(os.networkInterfaces()[key], function(obj) {
 				return obj.family == "IPv4" && !obj.internal;
 			});
