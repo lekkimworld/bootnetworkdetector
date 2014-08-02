@@ -6,8 +6,11 @@ var _ = require("underscore");
 var Fiber = require('fibers');
 var argv = require("optimist")
 	.usage("Send push notification via pushover whenever an IP address is obtained.\nUsage: $0")
+	.describe("verbose", "Prints out the supplied arguments before proceeding")
 	.demand("device")
-	.describe("device", "The devide ID to use for the push notification")
+	.describe("device", "The device ID to use for the push notification")
+	.describe("pushover_token", "The Pushover.net token to use when sending push notifications (may be an EXPORT called PUSHOVER_TOKEN)")
+	.describe("pushover_user", "The Pushover.net user to use when sending push notifications (may be an EXPORT called PUSHOVER_USER")
 	.default("initialwait", 0)
 	.describe("initialwait", "The initial wait in seconds before starting to look for obtained IP address")
 	.alias("iw", "initialwait")
@@ -23,6 +26,17 @@ var argv = require("optimist")
 var DO_NOTIFICATION = argv.notify;
 var INITIAL_SLEEP = argv.initialwait;
 var MAX_WAIT = argv.maxwait;
+var PUSHOVER_TOKEN = argv.pushover_token ? argv.pushover_token : process.env['PUSHOVER_TOKEN'];
+var PUSHOVER_USER = argv.pushover_user ? argv.pushover_user : process.env['PUSHOVER_USER'];
+
+if (argv.verbose) {
+	console.log("Verbose debug:");
+	console.log("\tNotification: " + DO_NOTIFICATION);
+	console.log("\tInitial sleep: " + INITIAL_SLEEP + " (second)");
+	console.log("\tMax wait: " + MAX_WAIT + " (second)");
+	console.log("\tPushover.net token: " + PUSHOVER_TOKEN.substring(0, 5) + "...");
+	console.log("\tPushover.net user: " + PUSHOVER_USER.substring(0, 5) + "...");
+}
 
 var sleep = function(ms) {
     var fiber = Fiber.current;
@@ -51,8 +65,8 @@ var addressesAquired = function(addresses) {
 	}
 
 	var p = new push( {
-	    user: process.env['PUSHOVER_USER'],
-	    token: process.env['PUSHOVER_TOKEN'],
+	    user: PUSHOVER_USER,
+	    token: PUSHOVER_TOKEN
 	});
 	var msg = {
 	    message: message, 
