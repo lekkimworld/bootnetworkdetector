@@ -3,7 +3,6 @@
 var push = require("pushover-notifications");
 var os = require("os");
 var _ = require("underscore");
-var Fiber = require('fibers');
 /*
 var bunyan = (function() {
 	try {
@@ -48,14 +47,6 @@ if (argv.verbose) {
 	console.log("\tPushover.net user: " + PUSHOVER_USER.substring(0, 5) + "...");
 }
 
-var sleep = function(ms) {
-    var fiber = Fiber.current;
-    setTimeout(function() {
-        fiber.run();
-    }, ms);
-    Fiber.yield();
-};
-
 var addressesAquired = function(addresses) {
 	// compose message
 	var message = os.hostname() + " aquired IP address(es): ";
@@ -93,10 +84,13 @@ var addressesAquired = function(addresses) {
 }
 
 // wait for addresses
-Fiber(function() {
+var run = function() {
 	// aquire addresses
 	var addresses = {};
-	sleep(INITIAL_SLEEP * 1000);
+	if (process.uptime() < INITIAL_SLEEP) {
+		setImmediate(run);
+		return;
+	}
 	while (_.isEmpty(addresses) && process.uptime() < MAX_WAIT) {
 		_.each(Object.keys(os.networkInterfaces()), function(key) {
 			var ipv4 = _.find(os.networkInterfaces()[key], function(obj) {
@@ -106,9 +100,11 @@ Fiber(function() {
 			addresses[key] = ipv4;
 		});
 		if (_.isEmpty(addresses)) {
-			sleep(1000);
+			setImmediate(run);
+			return;
 		} else {
 			addressesAquired(addresses);
 		}
 	}
-}).run();
+}
+run();
