@@ -4,6 +4,16 @@ var push = require("pushover-notifications");
 var os = require("os");
 var _ = require("underscore");
 var Fiber = require('fibers');
+/*
+var bunyan = (function() {
+	try {
+		return require('bunyan');
+	} catch (e) {
+		return null;
+	}
+})();
+var log = bunyan.createLogger({name: argv[1]};
+*/
 var argv = require("optimist")
 	.usage("Send push notification via pushover whenever an IP address is obtained.\nUsage: $0")
 	.describe("verbose", "Prints out the supplied arguments before proceeding")
